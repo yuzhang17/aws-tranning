@@ -1,0 +1,8 @@
+FROM ericzhang08/mavencache:latest as build
+COPY . /build
+WORKDIR /build
+RUN mvn clean && mvn install
+
+FROM openjdk:8
+COPY --from=build /build/target/*.jar app.jar
+ENTRYPOINT ["java", "-jar","/app.jar"]

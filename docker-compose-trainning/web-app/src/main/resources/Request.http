@@ -21,3 +21,12 @@ Content-Type: application/json
 }
 
 ###
+
+### Send POST request with json body
+GET http://localhost:8080/api/books
+Accept: application/json
+Authorization: Basic dXNlcjp1c2Vy
+Content-Type: application/json
+
+
+###
