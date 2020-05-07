@@ -1,5 +1,5 @@
 FROM maven:3.6.0-jdk-8 as build
-COPY . /build
+COPY ./web-app/ /build
 WORKDIR /build
 RUN mvn clean && mvn install
 
