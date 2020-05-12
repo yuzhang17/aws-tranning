@@ -6,9 +6,9 @@ Resources:
       Code:
         S3Bucket: zhangyu-lambda-test
         S3Key: lambda-s3-test-1.0-SNAPSHOT.jar
-      FunctionName: zhangyu-helloworld-with-cloudformation
-      Handler: index.handler
+      FunctionName: zhangyu-lambda-triger-with-s3-copy
+      Handler: com.ericzhang08.lambdatest.Handler
       Role: arn:aws:iam::494526681395:role/for-aws-training-2
-      Runtime: nodejs12.x
+      Runtime: java8
 
 
