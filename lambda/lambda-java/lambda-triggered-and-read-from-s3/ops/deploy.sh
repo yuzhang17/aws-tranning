@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-aws cloudformation deploy --template-file cloudformation.yaml --stack-name "zhangyu-lambda-triger-with-s3-copy"
+aws cloudformation deploy --template-file cloudformation.yaml --stack-name "zhangyu-lambda-trigered-and-read-from-s3"

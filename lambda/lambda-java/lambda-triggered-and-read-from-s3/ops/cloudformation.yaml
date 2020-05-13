@@ -5,9 +5,9 @@ Resources:
     Properties:
       Code:
         S3Bucket: zhangyu-lambda-test
-        S3Key: lambda-s3-test-1.0-SNAPSHOT.jar
-      FunctionName: zhangyu-lambda-triger-with-s3-copy
-      Handler: com.ericzhang08.lambdatest.Handler
+        S3Key: lambda-triggered-and-read-from-s3-1.0-SNAPSHOT.jar
+      FunctionName: zhangyu-lambda-trigered-and-read-from-s3
+      Handler: com.ericzhang08.lambdaread.Handler
       Role: arn:aws:iam::494526681395:role/for-aws-training-2
       Runtime: java8
 
