@@ -10,5 +10,7 @@ Resources:
       Handler: com.ericzhang08.lambdaread.Handler
       Role: arn:aws:iam::494526681395:role/for-aws-training-2
       Runtime: java8
+      MemorySize: 512
+      Timeout: 30
 
 
