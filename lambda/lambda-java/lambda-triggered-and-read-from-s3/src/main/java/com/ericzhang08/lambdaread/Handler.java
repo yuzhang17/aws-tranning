@@ -28,13 +28,11 @@ public class Handler implements RequestHandler<Map<String, String>, String> {
     public String handleRequest(Map<String, String> event, Context context) {
         logger.info("EVENT: " + gson.toJson(event));
         System.out.println("EVENT: "+ gson.toJson(event));
-        String s3bucket = event.get("S3bucket");
-        System.out.println(s3bucket);
         String s3Key = event.get("S3Key");
         System.out.println(s3Key);
 
         AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withRegion(Regions.AP_SOUTHEAST_1).build();
-        S3Object object = s3Client.getObject(s3bucket, s3Key);
+        S3Object object = s3Client.getObject("zhangyu-lambda-test", s3Key);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(object.getObjectContent()));
         bufferedReader.lines().forEach(System.out::println);
         return "ok";
