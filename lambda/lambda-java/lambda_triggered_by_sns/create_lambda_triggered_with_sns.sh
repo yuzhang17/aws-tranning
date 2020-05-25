@@ -21,4 +21,4 @@ aws lambda create-function --function-name zhangyu-lambda-sns \
     "Role": "arn:aws:iam::494526681395:role/for-aws-training-2",
     "Handler": "index.handler",
     "CodeSize": 358,
-    "Description": "",
+    "Description": "",}

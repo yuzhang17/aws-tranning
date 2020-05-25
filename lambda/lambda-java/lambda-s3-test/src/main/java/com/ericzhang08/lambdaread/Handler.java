@@ -13,8 +13,6 @@ import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.amazonaws.services.lambda.model.InvokeResult;
 
-import java.nio.charset.StandardCharsets;
-
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
