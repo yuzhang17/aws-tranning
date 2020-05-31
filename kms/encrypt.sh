@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-aws kms encrypt --key-id 784c6d3f-9528-4d9b-8c64-6d6f3707dace --plaintext file:///Users/yu.zhang2/WorkSpace/aws-tranning/kms/plaintFile.json --output text --query CiphertextBlob | base64 --decode > secrets.encrypted.json
+aws kms encrypt --key-id 784c6d3f-9528-4d9b-8c64-6d6f3707dace --plaintext fileb:///Users/yu.zhang2/WorkSpace/aws-tranning/kms/plaintFile.json --output text --query CiphertextBlob | base64 --decode > secrets.encrypted.json
 
 
 #aws kms encrypt --key-id 784c6d3f-9528-4d9b-8c64-6d6f3707dace  --plaintext file:///Users/yu.zhang2/WorkSpace/aws-tranning/kms/plaintFile.json
