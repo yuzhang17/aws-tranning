@@ -7,4 +7,5 @@ aws dynamodb update-table \
         AttributeName=projectType,AttributeType=S \
         AttributeName=mumberName,AttributeType=S \
         AttributeName=startDate,AttributeType=S \
-     --replica-updates
+    --provisioned-throughput ReadCapacityUnits=20,WriteCapacityUnits=10
+
