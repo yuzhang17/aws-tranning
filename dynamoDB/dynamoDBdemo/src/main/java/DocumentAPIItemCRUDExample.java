@@ -1,4 +1,7 @@
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -11,7 +14,7 @@ import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
-import com.amazonaws.services.dynamodbv2.model.ReturnValue;
+import com.amazonaws.services.dynamodbv2.model.*;
 
 public class DocumentAPIItemCRUDExample {
 
@@ -30,6 +33,8 @@ public class DocumentAPIItemCRUDExample {
 
         // Delete the item.
         deleteItem();
+
+        transactWriteItemsdemo();
 
     }
 
@@ -53,7 +58,7 @@ public class DocumentAPIItemCRUDExample {
 
         try {
 
-            Item item = table.getItem("projectName", 120, "projectType","projectType120","projectName, projectType, mumberName", null);
+            Item item = table.getItem("projectName", 120, "projectType", "projectType120", "projectName, projectType, mumberName", null);
 
             System.out.println("Printing item after retrieving it....");
             System.out.println(item.toJSONPretty());
@@ -87,7 +92,6 @@ public class DocumentAPIItemCRUDExample {
     }
 
 
-
     private static void deleteItem() {
 
         Table table = dynamoDB.getTable(tableName);
@@ -108,4 +112,35 @@ public class DocumentAPIItemCRUDExample {
             System.err.println(e.getMessage());
         }
     }
+
+    private static void transactWriteItemsdemo(){
+        TransactWriteItem transactWriteItem = createTransactionItem("projectName110", "projectType110");
+        TransactWriteItem transactWriteItem2 = createTransactionItem("projectName111", "projectType111");
+
+        Collection<TransactWriteItem> actions = Arrays.asList(
+                transactWriteItem, transactWriteItem2);
+
+        TransactWriteItemsRequest placeOrderTransaction = new TransactWriteItemsRequest()
+                .withTransactItems(actions)
+                .withReturnConsumedCapacity(ReturnConsumedCapacity.TOTAL);
+        try {
+            client.transactWriteItems(placeOrderTransaction);
+            System.out.println("Transaction Successful");
+
+        } catch (ResourceNotFoundException rnf) {
+            System.err.println("One of the table involved in the transaction is not found" + rnf.getMessage());
+        } catch (InternalServerErrorException ise) {
+            System.err.println("Internal Server Error" + ise.getMessage());
+        } catch (TransactionCanceledException tce) {
+            System.out.println("Transaction Canceled " + tce.getMessage());
+        }
+    }
+
+    public static TransactWriteItem createTransactionItem(String projectNameVal, String projectTypeVal) {
+        HashMap<String, AttributeValue> item= new HashMap<String, AttributeValue>();
+        item.put("projectName", new AttributeValue(projectNameVal));
+        item.put("projectType", new AttributeValue(projectTypeVal));
+       return new TransactWriteItem().withPut(new Put().withItem(item).withTableName(tableName));
+    }
+
 }
