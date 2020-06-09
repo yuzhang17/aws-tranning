@@ -19,19 +19,18 @@
    You can also use CloudWatch Events to schedule automated actions that self-trigger at certain times using cron or rate expressions.
 
 4. 相关概念理解：
-   metrics ：todo
+   
+   metrics ：Metrics are the fundamental concept in CloudWatch. A metric represents a time-ordered set of data points that are published to CloudWatch. Think of a metric as a variable to monitor, and the data points as representing the values of that variable over time. For example, the CPU usage of a particular EC2 instance is one metric provided by Amazon EC2. The data points themselves can come from any application or business activity from which you collect data.
 
-   periods
-
+   periods:A period is the length of time associated with a specific Amazon CloudWatch statistic. Each statistic represents an aggregation of the metrics data collected for a specified period of time. Periods are defined in numbers of seconds, and valid values for period are 1, 5, 10, 30, or any multiple of 60. For example, to specify a period of six minutes, use 360 as the period value. You can adjust how the data is aggregated by varying the length of the period. A period can be as short as one second or as long as one day (86,400 seconds). The default value is 60 seconds.
    namespace
-
-   count
 
    dimensions:
    A dimension is a name/value pair that is part of the identity of a metric. You can assign up to 10 dimensions to a metric.
 
    Every metric has specific characteristics that describe it, and you can think of dimensions as categories for those characteristics. Dimensions help you design a structure for your statistics plan. Because dimensions are part of the unique identifier for a metric, whenever you add a unique name/value pair to one of your metrics, you are creating a new variation of that metric.
-   statistics
+   
+   statistics:Statistics are metric data aggregations over specified periods of time. CloudWatch provides statistics based on the metric data points provided by your custom data or provided by other AWS services to CloudWatch. Aggregations are made using the namespace, metric name, dimensions, and the data point unit of measure, within the time period you specify. The following table describes the available statistics.
 
    ## 2. Practice
 
@@ -59,7 +58,26 @@
    ```
      
 2. 创建cloudwatch event rules，每分钟自动触发Lambda（输出固定格式的log message）。为lambda log创建metric filter，匹配log message，创建新的metric，自定义并监控条件使alarm触发阈值，alarm出发SNS，SNS发告警到邮箱。
+      
+       1. 使用sam生成项目cloud-watch-log-metrics
+       2. yaml模板文件位置：cloud-watch-log-metrics/template.yaml
+       3. stack information
+    
+      
+       ```
+            version = 0.1
+            [default]
+            [default.deploy]
+            [default.deploy.parameters]
+            stack_name = "cloud-watch-log-metrics-zhangyu"
+            s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1a1b4wsic34ky"
+            s3_prefix = "cloud-watch-log-metrics-zhangyu"
+            region = "ap-southeast-1"
+            confirm_changeset = true
+            capabilities = "CAPABILITY_IAM"
 
+       
+       ```
    
 
    

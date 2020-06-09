@@ -1,0 +1,88 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  cloud-watch-create-metrics
+
+  Sample SAM Template for cloud-watch-create-metrics
+
+Globals:
+  Function:
+    Timeout: 20
+
+Resources:
+  LogMetricsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: LogMetricsFunction
+      FunctionName: LogMetricsFunction
+      Handler: metrics.App::handleRequest
+      Runtime: java8
+      MemorySize: 512
+      Role: arn:aws:iam::494526681395:role/for-aws-training-2
+  LogScheduledRule:
+    Type: AWS::Events::Rule
+    Properties:
+      ScheduleExpression: "rate(1 day)"
+#      //todo set long time schedule to prevent send email
+#      ScheduleExpression: "rate(1 minute)"
+      State: "ENABLED"
+      Targets:
+        - Arn:
+            Fn::GetAtt:
+              - "LogMetricsFunction"
+              - "Arn"
+          Id: "TargetFunctionV1"
+    DependsOn:
+      - LogMetricsFunction
+  LogPermissionForEventsToInvokeLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: "LogMetricsFunction"
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn:
+        Fn::GetAtt:
+          - "LogScheduledRule"
+          - "Arn"
+    DependsOn:
+      - LogMetricsFunction
+      - LogScheduledRule
+  LogEmailSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: "LogEmailSNSTopic"
+      Subscription:
+        - Protocol: email
+          Endpoint: yu.zhang2@thoughtworks.com
+
+  LogMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: "/aws/lambda/LogMetricsFunction"
+      FilterPattern: "[name, times = 0]"
+      MetricTransformations:
+        - MetricValue: "1"
+          MetricNamespace: "zhangyu/logs"
+          MetricName: "times5Count"
+    DependsOn: LogMetricsFunction
+
+  LogAlarmZhangYu:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: times 5 account
+      AlarmName: LogAlarmZhangYu
+      ComparisonOperator: GreaterThanThreshold
+      EvaluationPeriods: 1
+      MetricName: "times5Count"
+      Namespace: "zhangyu/logs"
+      Threshold: 1
+#      todo: set 10000 to prevent send email
+#      Threshold: 10000
+      Period: 60
+      Statistic: Average
+      TreatMissingData: breaching
+      AlarmActions:
+        - !Ref LogEmailSNSTopic
+    DependsOn: LogEmailSNSTopic
+
