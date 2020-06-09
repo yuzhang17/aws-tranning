@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'cloud-watch-create-metrics
+
+  Sample SAM Template for cloud-watch-create-metrics
+
+  '
+Globals:
+  Function:
+    Timeout: 20
+Resources:
+  CreateMetricsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: CreateMetricsFunction
+      Handler: metrics.App::handleRequest
+      Runtime: java8
+      MemorySize: 512
+      Role: arn:aws:iam::494526681395:role/for-aws-training-2
+  ScheduledRule:
+    Type: AWS::Events::Rule
+    Properties:
+      ScheduleExpression: rate(1 minute)
+      State: ENABLED
+      Targets:
+      - Arn:
+          Fn::GetAtt:
+          - CreateMetricsFunction
+          - Arn
+        Id: TargetFunctionV1
+  PermissionForEventsToInvokeLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: CreateMetricsFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn:
+        Fn::GetAtt:
+        - ScheduledRule
+        - Arn
+  Resources:
+    LambdaInvocationsAnomalyDetector:
+      Type: AWS::CloudWatch::AnomalyDetector
+      Properties:
+        MetricName: Invocations
+        Namespace: AWS/Lambda
+        Stat: Sum
+
+    LambdaInvocationsAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmDescription: sqs invocations
+        AlarmName: LambdaInvocationsAlarm
+        ComparisonOperator: LessThanLowerOrGreaterThanUpperThreshold
+        EvaluationPeriods: 1
+        Metrics:
+          - Expression: ANOMALY_DETECTION_BAND(m1, 2)
+            Id: ad1
+          - Id: m1
+            MetricStat:
+              Metric:
+                MetricName: Invocations
+                Namespace: AWS/Lambda
+              Period: !!int 86400
+              Stat: Sum
+        ThresholdMetricId: ad1
+        TreatMissingData: breaching
+Outputs:
+  CreateMetricsFunction:
+    Description: Hello World Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - CreateMetricsFunction
+      - Arn
