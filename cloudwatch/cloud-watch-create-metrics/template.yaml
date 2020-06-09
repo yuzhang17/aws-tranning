@@ -5,7 +5,6 @@ Description: >
 
   Sample SAM Template for cloud-watch-create-metrics
 
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 20
@@ -22,7 +21,9 @@ Resources:
   ScheduledRule:
     Type: AWS::Events::Rule
     Properties:
-      ScheduleExpression: "rate(1 minute)"
+      ScheduleExpression: "rate(1 day)"
+#      //todo set long time schedule to prevent send email
+#      ScheduleExpression: "rate(1 minute)"
       State: "ENABLED"
       Targets:
         - Arn:
@@ -41,21 +42,14 @@ Resources:
         Fn::GetAtt:
           - "ScheduledRule"
           - "Arn"
-  MySNSTopic:
+  EmailSNSTopic:
     Type: AWS::SNS::Topic
     Properties:
+      TopicName: "EmailSNSTopic"
       Subscription:
-        - Endpoint:
-            Fn::GetAtt:
-              - "MyQueue1"
-              - "Arn"
-          Protocol: "sqs"
-        - Endpoint:
-            Fn::GetAtt:
-              - "MyQueue2"
-              - "Arn"
-          Protocol: "sqs"
-      TopicName: "SampleTopic"
+        - Protocol: email
+          Endpoint: yu.zhang2@thoughtworks.com
+
   PageVisitedAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -69,14 +63,15 @@ Resources:
           Value: "URLS"
       MetricName: "PAGES_VISITED"
       Namespace: "SITE/TRAFFIC"
-      Threshold: 1
+#      Threshold: 1
+#      todo: set 10000 to prevent send email
+      Threshold: 100000
+
+      Period: 60
+      Statistic: Average
       TreatMissingData: breaching
-      "AlarmActions": [
-        - Fn::GetAtt:
-            - "ScheduledRule"
-            - "Arn",
-        - "arn:aws:sns:region:account-id:sns-topic-name"
-      ],
+      AlarmActions:
+        - !Ref EmailSNSTopic
 
 
 Outputs:

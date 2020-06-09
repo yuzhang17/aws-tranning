@@ -39,33 +39,31 @@ Resources:
         Fn::GetAtt:
         - ScheduledRule
         - Arn
-  Resources:
-    LambdaInvocationsAnomalyDetector:
-      Type: AWS::CloudWatch::AnomalyDetector
-      Properties:
-        MetricName: Invocations
-        Namespace: AWS/Lambda
-        Stat: Sum
-
-    LambdaInvocationsAlarm:
-      Type: AWS::CloudWatch::Alarm
-      Properties:
-        AlarmDescription: sqs invocations
-        AlarmName: LambdaInvocationsAlarm
-        ComparisonOperator: LessThanLowerOrGreaterThanUpperThreshold
-        EvaluationPeriods: 1
-        Metrics:
-          - Expression: ANOMALY_DETECTION_BAND(m1, 2)
-            Id: ad1
-          - Id: m1
-            MetricStat:
-              Metric:
-                MetricName: Invocations
-                Namespace: AWS/Lambda
-              Period: !!int 86400
-              Stat: Sum
-        ThresholdMetricId: ad1
-        TreatMissingData: breaching
+  EmailSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: EmailSNSTopic
+      Subscription:
+      - Protocol: email
+        Endpoint: yu.zhang2@thoughtworks.com
+  PageVisitedAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: page visited invocations
+      AlarmName: PageVisitedAlarm
+      ComparisonOperator: GreaterThanThreshold
+      EvaluationPeriods: 1
+      Dimensions:
+      - Name: UNIQUE_PAGES
+        Value: URLS
+      MetricName: PAGES_VISITED
+      Namespace: SITE/TRAFFIC
+      Threshold: 1
+      Period: 60
+      Statistic: Average
+      TreatMissingData: breaching
+      AlarmActions:
+      - Ref: EmailSNSTopic
 Outputs:
   CreateMetricsFunction:
     Description: Hello World Lambda Function ARN
