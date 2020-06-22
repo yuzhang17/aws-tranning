@@ -9,10 +9,10 @@ Globals:
   Function:
     Timeout: 20
 Resources:
-  ScheduledRule:
+  ScheduledRuleTest:
     Type: AWS::Events::Rule
     Properties:
-      ScheduleExpression: rate(5 minutes)
+      ScheduleExpression: rate(1 minute)
       State: ENABLED
       Targets:
       - Arn:
@@ -24,9 +24,23 @@ Resources:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: SNSTopicZhangYu
-      Subscription:
-      - Protocol: email
-        Endpoint: yu.zhang2@thoughtworks.com
+      KmsMasterKeyId: d9e54010-f4dd-4f45-8bec-75cbc6b034d9
+  SNSTopicPolicyZhangYu:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics:
+      - Ref: SNSTopicZhangYu
+      PolicyDocument:
+        Id: MyTopicPolicy
+        Version: '2012-10-17'
+        Statement:
+          Effect: Allow
+          Principal: '*'
+          Action:
+          - sns:Subscribe
+          - sns:Publish
+          Resource:
+            Ref: SNSTopicZhangYu
   SQSSubscription:
     Type: AWS::SNS::Subscription
     Properties:
@@ -93,7 +107,7 @@ Resources:
       MemorySize: 512
       Role: arn:aws:iam::494526681395:role/for-aws-training-2
       Timeout: 60
-  PermissionForSqsInvokeLambda:
+  PermissionSNSPracticeLambdaFunction:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName:
