@@ -3,7 +3,7 @@ version = 0.1
 [default.deploy]
 [default.deploy.parameters]
 stack_name = "sns-practice-zhangyu"
-s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1a1b4wsic34ky"
+s3_bucket = "sns-zhangyu"
 s3_prefix = "sns-practice-zhangyu"
 region = "ap-southeast-1"
 confirm_changeset = true

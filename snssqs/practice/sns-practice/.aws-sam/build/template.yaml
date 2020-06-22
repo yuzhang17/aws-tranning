@@ -12,17 +12,18 @@ Resources:
   ScheduledRule:
     Type: AWS::Events::Rule
     Properties:
-      ScheduleExpression: rate(5 minute)
+      ScheduleExpression: rate(5 minutes)
       State: ENABLED
       Targets:
       - Arn:
-          Fn::GetAtt:
-          - EmailSNSTopic
-          - Arn
-  SNSTopic:
+          Ref: SNSTopicZhangYu
+        Id: TargetSNSTopicZhangYu
+    DependsOn:
+    - SNSTopicZhangYu
+  SNSTopicZhangYu:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: SNSTopic
+      TopicName: SNSTopicZhangYu
       Subscription:
       - Protocol: email
         Endpoint: yu.zhang2@thoughtworks.com
@@ -30,13 +31,16 @@ Resources:
     Type: AWS::SNS::Subscription
     Properties:
       TopicArn:
-        Ref: SNSTopic
+        Ref: SNSTopicZhangYu
       Endpoint:
         Fn::GetAtt:
         - LambdaInvokeQueue
         - Arn
       Protocol: sqs
-      RawMessageDelivery: 'true'
+      RawMessageDelivery: true
+    DependsOn:
+    - LambdaInvokeQueue
+    - SNSTopicZhangYu
   LambdaInvokeQueue:
     Type: AWS::SQS::Queue
     Properties:
@@ -49,6 +53,8 @@ Resources:
           - MyDeadLetterQueue
           - Arn
         maxReceiveCount: 5
+    DependsOn:
+    - MyDeadLetterQueue
   SampleSQSPolicy:
     Type: AWS::SQS::QueuePolicy
     Properties:
@@ -75,6 +81,9 @@ Resources:
           Principal:
             AWS:
             - '*'
+    DependsOn:
+    - MyDeadLetterQueue
+    - LambdaInvokeQueue
   SNSPracticeLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -95,6 +104,9 @@ Resources:
         Fn::GetAtt:
         - LambdaInvokeQueue
         - Arn
+    DependsOn:
+    - SNSPracticeLambdaFunction
+    - LambdaInvokeQueue
   EventSourceMapping:
     Type: AWS::Lambda::EventSourceMapping
     Properties:
@@ -107,5 +119,8 @@ Resources:
         Fn::GetAtt:
         - SNSPracticeLambdaFunction
         - Arn
+    DependsOn:
+    - SNSPracticeLambdaFunction
+    - LambdaInvokeQueue
   MyDeadLetterQueue:
     Type: AWS::SQS::Queue
