@@ -20,7 +20,7 @@ Resources:
   ScheduledRule:
     Type: AWS::Events::Rule
     Properties:
-      ScheduleExpression: rate(1 minute)
+      ScheduleExpression: rate(1 day)
       State: ENABLED
       Targets:
       - Arn:
@@ -58,7 +58,7 @@ Resources:
         Value: URLS
       MetricName: PAGES_VISITED
       Namespace: SITE/TRAFFIC
-      Threshold: 1
+      Threshold: 100000
       Period: 60
       Statistic: Average
       TreatMissingData: breaching

@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sns-practice
+
+  Sample SAM Template for sns-practice
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 20
+
+Resources:
+  ScheduledRule:
+    Type: AWS::Events::Rule
+    Properties:
+      ScheduleExpression: "rate(5 minute)"
+      State: "ENABLED"
+      Targets:
+        - Arn:
+            Fn::GetAtt:
+              - "EmailSNSTopic"
+              - "Arn"
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: "SNSTopic"
+      Subscription:
+        - Protocol: email
+          Endpoint: yu.zhang2@thoughtworks.com
+
+  SQSSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref SNSTopic
+      Endpoint: !GetAtt
+        - LambdaInvokeQueue
+        - Arn
+      Protocol: sqs
+      RawMessageDelivery: 'true'
+
+
+  LambdaInvokeQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      MessageRetentionPeriod: 604800
+      VisibilityTimeout: 300
+
+      KmsMasterKeyId: d9e54010-f4dd-4f45-8bec-75cbc6b034d9
+      RedrivePolicy:
+        deadLetterTargetArn:
+          Fn::GetAtt:
+            - "MyDeadLetterQueue"
+            - "Arn"
+        maxReceiveCount: 5
+
+  SampleSQSPolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref LambdaInvokeQueue
+        - !Ref MyDeadLetterQueue
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "SQS:SendMessage"
+              - "SQS:ReceiveMessage"
+            Effect: "Allow"
+            Resource: !Ref LambdaInvokeQueue
+            Principal:
+              AWS:
+                - "*"
+          - Action:
+              - "SQS:SendMessage"
+              - "SQS:ReceiveMessage"
+            Effect: "Allow"
+            Resource: !Ref MyDeadLetterQueue
+            Principal:
+              AWS:
+                - "*"
+
+
+  SNSPracticeLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: SNSPractice
+      Handler: practice.App::handleRequest
+      Runtime: java8
+      MemorySize: 512
+      Role: arn:aws:iam::494526681395:role/for-aws-training-2
+      Timeout: 60
+
+  PermissionForSqsInvokeLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: "SNSPracticeLambdaFunction"
+      Action: "lambda:InvokeFunction"
+      Principal: "sqs.amazonaws.com"
+      SourceArn:
+        Fn::GetAtt:
+          - "LambdaInvokeQueue"
+          - "Arn"
+  EventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      Enabled: true
+      EventSourceArn: !GetAtt LambdaInvokeQueue.Arn
+      FunctionName: !GetAtt SNSPracticeLambdaFunction.Arn
+
+  MyDeadLetterQueue:
+    Type: AWS::SQS::Queue
+
+
+

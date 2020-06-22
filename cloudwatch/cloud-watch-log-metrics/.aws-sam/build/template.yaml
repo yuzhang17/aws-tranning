@@ -21,14 +21,13 @@ Resources:
   LogScheduledRule:
     Type: AWS::Events::Rule
     Properties:
-      ScheduleExpression: rate(1 day)
+      ScheduleExpression: rate(1 minute)
       State: ENABLED
       Targets:
       - Arn:
           Fn::GetAtt:
           - LogMetricsFunction
           - Arn
-        Id: TargetFunctionV1
     DependsOn:
     - LogMetricsFunction
   LogPermissionForEventsToInvokeLambda:
