@@ -25,6 +25,9 @@ Resources:
     Properties:
       TopicName: SNSTopicZhangYu
       KmsMasterKeyId: d9e54010-f4dd-4f45-8bec-75cbc6b034d9
+      Tags:
+      - Key: TopicType
+        Value: production
   SNSTopicPolicyZhangYu:
     Type: AWS::SNS::TopicPolicy
     Properties:
@@ -54,6 +57,20 @@ Resources:
       RawMessageDelivery: true
     DependsOn:
     - LambdaInvokeQueue
+    - SNSTopicZhangYu
+  EamilSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn:
+        Ref: SNSTopicZhangYu
+      Endpoint: yu.zhang2@thoughtworks.com
+      Protocol: email
+      RedrivePolicy:
+        deadLetterTargetArn:
+          Fn::GetAtt:
+          - MyDeadLetterQueue
+          - Arn
+    DependsOn:
     - SNSTopicZhangYu
   LambdaInvokeQueue:
     Type: AWS::SQS::Queue
